@@ -12,10 +12,13 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "api/index.js" },
-    { "source": "/(.*)", "destination": "/$1" }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+    {
+      "source": "/api/(.*)",
+      "destination": "api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
