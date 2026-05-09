@@ -126,12 +126,6 @@ const changePassword = async (req, res, next) => {
   }
 };
 
-// ─── Google OAuth Callback ────────────────────────────────────
-const googleCallback = async (req, res) => {
-  const token = generateToken(req.user._id);
-  // Redirect to frontend with token
-  res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
-};
 
 const demoLogin = async (req, res, next) => {
   try {
@@ -166,6 +160,5 @@ module.exports = {
   getMe,
   updateProfile,
   changePassword,
-  googleCallback,
   demoLogin,
 };

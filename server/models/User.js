@@ -90,9 +90,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// ─── Indexes ──────────────────────────────────────────────────
-userSchema.index({ email: 1 });
-userSchema.index({ googleId: 1 });
 
 // ─── Virtuals ─────────────────────────────────────────────────
 userSchema.virtual('initials').get(function () {

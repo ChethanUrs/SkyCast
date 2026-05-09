@@ -24,20 +24,6 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // Handle Google OAuth callback token
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (token && window.location.pathname === '/auth/callback') {
-      localStorage.setItem('skycast-token', token);
-      api.get('/auth/me').then(({ data }) => {
-        setUser(data.user);
-        window.history.replaceState({}, '', '/');
-      }).catch(() => {
-        localStorage.removeItem('skycast-token');
-      });
-    }
-  }, []);
 
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
@@ -59,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     setUser(data.user);
     return data;
   }, []);
+
 
   const logout = useCallback(() => {
     localStorage.removeItem('skycast-token');

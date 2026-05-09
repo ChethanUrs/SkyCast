@@ -9,6 +9,11 @@ const { generalLimiter } = require('./middleware/rateLimiter');
 
 // Route imports
 const weatherRoutes = require('./routes/weather');
+const authRoutes = require('./routes/auth');
+const locationRoutes = require('./routes/locations');
+const preferenceRoutes = require('./routes/preferences');
+const passport = require('passport');
+require('./config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -23,17 +28,6 @@ connectDB()
     console.log('   Weather API is fully functional without MongoDB.\n');
   });
 
-// ─── Conditionally load auth/location routes ──────────────────────────────────
-let authRoutes, locationRoutes, preferenceRoutes, passport;
-try {
-  passport = require('passport');
-  require('./config/passport');
-  authRoutes = require('./routes/auth');
-  locationRoutes = require('./routes/locations');
-  preferenceRoutes = require('./routes/preferences');
-} catch (e) {
-  console.log('⚠️  Auth routes skipped:', e.message);
-}
 
 // ─── Security ─────────────────────────────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -48,7 +42,7 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
-if (passport) app.use(passport.initialize());
+app.use(passport.initialize());
 
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
 app.use('/api', generalLimiter);
@@ -56,10 +50,10 @@ app.use('/api', generalLimiter);
 // ─── Core Routes (always available) ──────────────────────────────────────────
 app.use('/api/weather', weatherRoutes);
 
-// ─── Auth Routes (only if MongoDB is available) ───────────────────────────────
-if (authRoutes) app.use('/api/auth', authRoutes);
-if (locationRoutes) app.use('/api/locations', locationRoutes);
-if (preferenceRoutes) app.use('/api/preferences', preferenceRoutes);
+// ─── Registered Routes ───────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+app.use('/api/locations', locationRoutes);
+app.use('/api/preferences', preferenceRoutes);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

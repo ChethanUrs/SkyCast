@@ -4,7 +4,7 @@ const passport = require('passport');
 const { protect } = require('../middleware/auth');
 const { authLimiter } = require('../middleware/rateLimiter');
 const {
-  register, login, getMe, updateProfile, changePassword, googleCallback, demoLogin,
+  register, login, getMe, updateProfile, changePassword, demoLogin,
 } = require('../controllers/authController');
 
 // Public routes
@@ -12,12 +12,14 @@ router.post('/register', authLimiter, register);
 router.post('/login', authLimiter, login);
 router.post('/demo', authLimiter, demoLogin);
 
-// Google OAuth
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
-router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth`, session: false }),
-  googleCallback
-);
+// Placeholder for removed Google Login to prevent 404s
+router.all(['/google', '/google/callback'], (req, res) => {
+  res.status(503).json({ 
+    success: false, 
+    message: 'Google Login is currently disabled for maintenance. Please use Email/Password or the Demo login instead.' 
+  });
+});
+
 
 // Protected routes
 router.get('/me', protect, getMe);
