@@ -479,7 +479,13 @@ async function getFullWeather({ lat, lon, city, unit = 'celsius', windUnit = 'km
   ]);
 
   return {
-    current: { ...current, aqi, aiSummary },
+    current: { 
+      ...current, 
+      aqi, 
+      aiSummary,
+      utcOffsetSeconds: current?.utcOffsetSeconds,
+      timezoneAbbreviation: current?.timezoneAbbreviation
+    },
     forecast,
     aiRecommendations: aiRecs,
   };
