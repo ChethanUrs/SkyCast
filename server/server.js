@@ -32,11 +32,17 @@ connectDB()
 // ─── Security ─────────────────────────────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3001',
+  origin: true, // Allow all origins for debugging
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Request Logger for Vercel
+app.use((req, res, next) => {
+  console.log(`📡 [${req.method}] ${req.url}`);
+  next();
+});
 
 // ─── General Middleware ───────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));

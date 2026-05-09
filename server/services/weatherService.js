@@ -445,13 +445,26 @@ async function getFullWeather({ lat, lon, city, unit = 'celsius', windUnit = 'km
   if (cachedWeather) {
     ({ current, forecast, aqi } = cachedWeather);
   } else {
-    // Parallel fetch weather + AQI
-    [current, aqi] = await Promise.all([
-      getCurrentWeather({ ...coords, ...geoInfo, unit, windUnit, timeFormat }),
-      getAirQuality(coords),
-    ]);
-    forecast = await getForecast({ ...coords, unit, windUnit, timeFormat });
-    cache.set(weatherCacheKey, { current, forecast, aqi });
+    // Parallel fetch weather + AQI with individual error handling
+    try {
+      const results = await Promise.allSettled([
+        getCurrentWeather({ ...coords, ...geoInfo, unit, windUnit, timeFormat }),
+        getAirQuality(coords),
+        getForecast({ ...coords, unit, windUnit, timeFormat })
+      ]);
+
+      current = results[0].status === 'fulfilled' ? results[0].value : null;
+      aqi = results[1].status === 'fulfilled' ? results[1].value : null;
+      forecast = results[2].status === 'fulfilled' ? results[2].value : null;
+
+      if (!current) throw new Error('Failed to fetch current weather data');
+      
+      cache.set(weatherCacheKey, { current, forecast, aqi });
+    } catch (err) {
+      console.error('❌ Weather fetch error:', err.message);
+      throw err;
+    }
+  }
   }
 
   // Gemini AI enhancements (always fresh, non-blocking)
