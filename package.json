@@ -12,7 +12,7 @@
     "@google/generative-ai": "^0.24.1",
     "passport": "^0.7.0"
   },
-  "scripts": {
-    "build": "cd client && npm install && npm run build"
+  "engines": {
+    "node": "18.x"
   }
 }
