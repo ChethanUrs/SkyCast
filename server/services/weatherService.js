@@ -187,6 +187,8 @@ async function getCurrentWeather({ lat, lon, cityName, country, countryCode, uni
     sunset: formatTime(d.sunset?.[0], timeFormat),
     isDay,
     timezone: data.timezone,
+    timezoneAbbreviation: data.timezone_abbreviation,
+    utcOffsetSeconds: data.utc_offset_seconds,
     unit: isKelvin ? 'K' : tempUnit,
     windUnit: windUnit === 'knots' ? 'kn' : windUnit,
   };

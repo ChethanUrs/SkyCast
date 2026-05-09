@@ -28,6 +28,49 @@ const getConditionBg = (weatherId, isNight) => {
   return 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)'; // clouds
 };
 
+const LiveClock = ({ offsetSeconds, timezoneAbbr }) => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const localDate = new Date(time.getTime() + (time.getTimezoneOffset() * 60000) + (offsetSeconds * 1000));
+  
+  return (
+    <div style={{ 
+      marginTop: 8, 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 10,
+      color: 'rgba(255,255,255,0.9)',
+      fontSize: '0.9rem'
+    }}>
+      <span style={{ 
+        background: 'rgba(255,255,255,0.15)', 
+        padding: '2px 8px', 
+        borderRadius: 6,
+        fontSize: '0.85rem',
+        fontWeight: 500
+      }}>
+        {localDate.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}
+      </span>
+      <span style={{ 
+        fontFamily: 'monospace', 
+        fontSize: '1.2rem', 
+        fontWeight: 600,
+        letterSpacing: '0.5px'
+      }}>
+        {localDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+      </span>
+      {timezoneAbbr && (
+        <span style={{ opacity: 0.6, fontSize: '0.8rem' }}>{timezoneAbbr}</span>
+      )}
+    </div>
+  );
+};
+
 const CurrentWeather = ({ data }) => {
   const { temperatureUnit } = useSelector((s) => s.settings);
   const animatedTemp = useCountUp(data?.temperature);
@@ -69,6 +112,13 @@ const CurrentWeather = ({ data }) => {
           <p style={{ color: 'rgba(255,255,255,0.75)', textTransform: 'capitalize', fontSize: '1rem' }}>
             {data.description}
           </p>
+          
+          {data.utcOffsetSeconds !== undefined && (
+            <LiveClock 
+              offsetSeconds={data.utcOffsetSeconds} 
+              timezoneAbbr={data.timezoneAbbreviation} 
+            />
+          )}
         </div>
 
         <motion.img
