@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "SkyCast Weather",
+        "supportEmail": "chethanrajeursk@gmail.com"
+      }
+    }
+  }
+}

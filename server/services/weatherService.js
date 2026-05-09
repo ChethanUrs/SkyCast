@@ -113,6 +113,7 @@ async function reverseGeocode(lat, lon) {
     const { data } = await axios.get('https://nominatim.openstreetmap.org/reverse', {
       params: { lat, lon, format: 'json' },
       headers: { 'User-Agent': 'SkyCast-App/1.0' },
+      timeout: 5000,
     });
     const result = {
       cityName: data.address?.city || data.address?.town || data.address?.village || data.address?.county || 'Unknown',
@@ -147,6 +148,7 @@ async function getCurrentWeather({ lat, lon, cityName, country, countryCode, uni
       timezone: 'auto',
       forecast_days: 1,
     },
+    timeout: 10000,
   });
 
   const c = data.current;
@@ -212,6 +214,7 @@ async function getForecast({ lat, lon, unit = 'celsius', windUnit = 'kmh', timeF
       timezone: 'auto',
       forecast_days: 7,
     },
+    timeout: 10000,
   });
 
   const isKelvin = unit === 'kelvin';
@@ -277,6 +280,7 @@ async function getAirQuality({ lat, lon }) {
         longitude: lon,
         current: ['pm10', 'pm2_5', 'carbon_monoxide', 'nitrogen_dioxide', 'ozone', 'european_aqi'].join(','),
       },
+      timeout: 8000,
     });
 
     const c = data.current;
@@ -464,7 +468,6 @@ async function getFullWeather({ lat, lon, city, unit = 'celsius', windUnit = 'km
       console.error('❌ Weather fetch error:', err.message);
       throw err;
     }
-  }
   }
 
   // Gemini AI enhancements (always fresh, non-blocking)

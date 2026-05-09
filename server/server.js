@@ -18,15 +18,18 @@ require('./config/passport');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// ─── Try connecting to MongoDB (optional — weather works without it) ─────────
+// ─── Try connecting to MongoDB (async, non-blocking) ──────────────────────────
 let dbConnected = false;
 const connectDB = require('./config/db');
-connectDB()
-  .then(() => { dbConnected = true; })
-  .catch(() => {
-    console.log('⚠️  MongoDB not available — auth & saved locations disabled.');
-    console.log('   Weather API is fully functional without MongoDB.\n');
-  });
+if (process.env.MONGODB_URI) {
+  connectDB()
+    .then(() => { dbConnected = true; })
+    .catch((err) => {
+      console.log('⚠️  DB connection background task failed:', err.message);
+    });
+} else {
+  console.log('ℹ️  Running without MongoDB (MONGODB_URI missing)');
+}
 
 
 // ─── Security ─────────────────────────────────────────────────────────────────
@@ -47,7 +50,7 @@ app.use((req, res, next) => {
 // ─── General Middleware ───────────────────────────────────────────────────────
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
+app.use(morgan('short')); // Use 'short' format for cleaner logs on Vercel
 app.use(passport.initialize());
 
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
@@ -74,9 +77,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ─── 404 Handler ─────────────────────────────────────────────────────────────
-app.use('*', (req, res) => {
-  res.status(404).json({ success: false, message: 'Route not found' });
+// ─── Health Check ─────────────────────────────────────────────────────────────
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    environment: process.env.NODE_ENV,
+    dbConnected,
+    weather: 'active',
+  });
+});
+
+// ─── 404 Handler ──────────────────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route [${req.method}] ${req.url} not found on this server.`,
+  });
 });
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────

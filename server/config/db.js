@@ -1,14 +1,19 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  if (!process.env.MONGODB_URI) {
+    console.log('⚠️  MONGODB_URI is not defined in environment variables.');
+    return;
+  }
+
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 4000,
     });
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    // Throw so server.js can catch and continue without DB
-    throw new Error(`MongoDB unavailable: ${error.message}`);
+    console.log(`⚠️  MongoDB unavailable: ${error.message}`);
+    // Don't throw, just let the app continue without DB features
   }
 };
 
