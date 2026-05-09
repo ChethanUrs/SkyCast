@@ -3,19 +3,44 @@ const path = require('path');
 
 const MOCK_DB_PATH = path.join(__dirname, '../data/mock_db.json');
 
-// Ensure data directory exists
-const dataDir = path.join(__dirname, '../data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir);
+// Memory fallback for read-only environments (like Vercel)
+let memoryDB = { users: [], locations: [] };
+let useMemory = false;
+
+try {
+  const dataDir = path.join(__dirname, '../data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  if (!fs.existsSync(MOCK_DB_PATH)) {
+    fs.writeFileSync(MOCK_DB_PATH, JSON.stringify(memoryDB));
+  }
+} catch (err) {
+  console.log('⚠️ Running in read-only mode (Vercel). Switching to in-memory mock storage.');
+  useMemory = true;
 }
 
-// Initial structure
-if (!fs.existsSync(MOCK_DB_PATH)) {
-  fs.writeFileSync(MOCK_DB_PATH, JSON.stringify({ users: [], locations: [] }));
-}
+const getDB = () => {
+  if (useMemory) return memoryDB;
+  try {
+    return JSON.parse(fs.readFileSync(MOCK_DB_PATH, 'utf8'));
+  } catch (err) {
+    return memoryDB;
+  }
+};
 
-const getDB = () => JSON.parse(fs.readFileSync(MOCK_DB_PATH, 'utf8'));
-const saveDB = (data) => fs.writeFileSync(MOCK_DB_PATH, JSON.stringify(data, null, 2));
+const saveDB = (data) => {
+  if (useMemory) {
+    memoryDB = data;
+    return;
+  }
+  try {
+    fs.writeFileSync(MOCK_DB_PATH, JSON.stringify(data, null, 2));
+  } catch (err) {
+    memoryDB = data;
+    useMemory = true;
+  }
+};
 
 const mockStorage = {
   users: {
@@ -37,12 +62,11 @@ const mockStorage = {
         ...userData, 
         _id: 'mock_' + Date.now(),
         createdAt: new Date(),
-        // Mocking methods
         toPublicJSON: function() {
           const { passwordHash, ...rest } = this;
           return rest;
         },
-        comparePassword: async (p) => p === userData.passwordHash // Very simple mock
+        comparePassword: async (p) => p === userData.passwordHash
       };
       db.users.push(newUser);
       saveDB(db);
