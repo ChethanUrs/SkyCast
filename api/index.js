@@ -63,6 +63,7 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV,
     dbConnected,
     weather: 'active',
+    version: '1.0.4-clock'
   });
 });
 
