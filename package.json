@@ -11,8 +11,5 @@
     "node-cache": "^5.1.2",
     "@google/generative-ai": "^0.24.1",
     "passport": "^0.7.0"
-  },
-  "engines": {
-    "node": "18.x"
   }
 }
