@@ -395,25 +395,38 @@ async function searchCities(query) {
 
 // ── MAIN ENTRY — fetch everything ─────────────────────────────────────────────
 async function getFullWeather({ lat, lon, city, unit = 'celsius', windUnit = 'kmh', timeFormat = '12h' }) {
-  let coords = { lat: parseFloat(lat), lon: parseFloat(lon) };
+  // 1. Initial coordinates (if provided)
+  let coords = { 
+    lat: lat != null ? parseFloat(lat) : NaN, 
+    lon: lon != null ? parseFloat(lon) : NaN 
+  };
   let geoInfo = {};
 
-  if (!city && (!lat || !lon)) {
+  // 2. Fallback to IP-based detection if no location provided
+  if (!city && (isNaN(coords.lat) || isNaN(coords.lon))) {
     try {
       console.log('📍 No coordinates provided, attempting IP-based geolocation...');
-      const ipRes = await axios.get('http://ip-api.com/json/');
-      if (ipRes.data && ipRes.data.status === 'success') {
-        coords = { lat: ipRes.data.lat, lon: ipRes.data.lon };
+      // Using ipapi.co as it supports HTTPS and is more reliable for serverless
+      const ipRes = await axios.get('https://ipapi.co/json/', { timeout: 3000 });
+      if (ipRes.data && !ipRes.data.error) {
+        coords = { lat: ipRes.data.latitude, lon: ipRes.data.longitude };
         geoInfo = { 
           cityName: ipRes.data.city, 
-          country: ipRes.data.country, 
-          countryCode: ipRes.data.countryCode 
+          country: ipRes.data.country_name, 
+          countryCode: ipRes.data.country_code 
         };
         console.log(`📍 Detected location from IP: ${geoInfo.cityName}, ${geoInfo.country}`);
       }
     } catch (err) {
       console.warn('⚠️ IP-based geolocation failed:', err.message);
     }
+  }
+
+  // 3. Last resort fallback (London) if everything else fails
+  if (isNaN(coords.lat) || isNaN(coords.lon)) {
+    console.log('📍 Using fallback location (London)');
+    coords = { lat: 51.5074, lon: -0.1278 };
+    geoInfo = { cityName: 'London', country: 'United Kingdom', countryCode: 'GB' };
   }
 
   if (city) {
