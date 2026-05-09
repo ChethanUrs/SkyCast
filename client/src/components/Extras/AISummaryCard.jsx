@@ -32,7 +32,7 @@ const AISummaryCard = ({ summary }) => {
           fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.12em',
           color: 'var(--accent-primary)', fontWeight: 600, marginBottom: 6,
         }}>
-          Gemini AI · Weather Insight
+          SkyCast AI · Weather Insight
         </div>
         <p style={{
           color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.65,
