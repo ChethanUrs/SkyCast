@@ -2,6 +2,9 @@
   "name": "skycast-root",
   "version": "1.0.0",
   "description": "SkyCast Root Package for Vercel Deployment",
+  "scripts": {
+    "build": "cd client && npm install && npm run build"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.16.0",
