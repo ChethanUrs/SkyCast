@@ -11,7 +11,7 @@ const { generalLimiter } = require('./middleware/rateLimiter');
 const weatherRoutes = require('./routes/weather');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // ─── Try connecting to MongoDB (optional — weather works without it) ─────────
 let dbConnected = false;
@@ -38,7 +38,7 @@ try {
 // ─── Security ─────────────────────────────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'http://localhost:3001',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -82,14 +82,16 @@ app.use('*', (req, res) => {
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use(errorHandler);
 
-// ─── Start Server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🌤️  SkyCast API running on http://localhost:${PORT}`);
-  console.log(`📡  Environment: ${process.env.NODE_ENV}`);
-  console.log(`🌍  Weather: Open-Meteo (free, no API key needed)`);
-  const hasGemini = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here';
-  console.log(`✨  Gemini AI: ${hasGemini ? '✅ Active' : '⚠️  Not configured (add GEMINI_API_KEY to .env)'}`);
-  console.log(`🔗  Client URL: ${process.env.CLIENT_URL}\n`);
-});
+// ─── Start Server (Only if not running as a serverless function) ─────────────
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`\n🌤️  SkyCast API running on http://localhost:${PORT}`);
+    console.log(`📡  Environment: ${process.env.NODE_ENV}`);
+    console.log(`🌍  Weather: Open-Meteo (free, no API key needed)`);
+    const hasGemini = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here';
+    console.log(`✨  Gemini AI: ${hasGemini ? '✅ Active' : '⚠️  Not configured (add GEMINI_API_KEY to .env)'}`);
+    console.log(`🔗  Client URL: ${process.env.CLIENT_URL}\n`);
+  });
+}
 
 module.exports = app;
