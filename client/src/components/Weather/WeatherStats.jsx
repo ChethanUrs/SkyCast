@@ -24,9 +24,17 @@ const StatCard = ({ icon, label, value, sub, index }) => (
 
 const WeatherStats = ({ data }) => {
   if (!data) return null;
+  const windUnitLabels = {
+    kmh: 'km/h',
+    mph: 'mph',
+    kn: 'knots',
+    ms: 'm/s'
+  };
+  const windLabel = data.windUnit ? (windUnitLabels[data.windUnit] || data.windUnit) : 'km/h';
+
   const stats = [
     { icon: '💧', label: 'Humidity', value: `${data.humidity}%` },
-    { icon: '🌬️', label: 'Wind Speed', value: `${data.windSpeed}`, sub: data.windUnit || 'km/h' },
+    { icon: '🌬️', label: 'Wind Speed', value: `${data.windSpeed}`, sub: windLabel },
     { icon: '🧭', label: 'Wind Dir', value: data.windDirection || `${data.windDeg}°` },
     { icon: '📊', label: 'Pressure', value: `${data.pressure} hPa` },
     { icon: '👁️', label: 'Visibility', value: data.visibility ? `${data.visibility} km` : 'N/A' },
